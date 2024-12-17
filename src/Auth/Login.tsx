@@ -1,4 +1,10 @@
+import { useState } from "react";
+
 import { Mail, Lock, Eye, EyeClosed } from "lucide-react";
+
+// formik
+import { useFormik } from "formik";
+import { LoginSchema } from "../Utils/yup.ts";
 
 import Button from "../components/Button/Button";
 import { Link } from "react-router-dom";
@@ -8,7 +14,40 @@ import logo from "../assets/logo.png";
 // components
 import Wrapper from "../components/Wrapper/Wrapper";
 
+interface Formvalues {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const initialValues: Formvalues = {
+    email: "",
+    password: "",
+    rememberMe: false,
+  };
+
+  // submit function
+  const onSubmit = async (values: Formvalues) => {
+    console.log(values);
+  };
+
+  const {
+    values,
+    handleChange,
+    errors,
+    isSubmitting,
+    touched,
+    handleSubmit,
+    handleBlur,
+  } = useFormik({
+    initialValues: initialValues,
+    onSubmit,
+    validationSchema: LoginSchema,
+  });
+
   return (
     <div className="min-h-screen  flex items-center justify-center">
       <Wrapper>
@@ -20,9 +59,9 @@ const Login = () => {
           </p>
         </header>
 
-        <form action="" className="">
+        <form action="" className="" onSubmit={handleSubmit}>
           <div className="mb-6">
-            <label htmlFor="email-address-icon" className="block mb-2 text-sm">
+            <label htmlFor="email" className="block mb-2 text-sm">
               Email
             </label>
             <div className="relative">
@@ -30,19 +69,29 @@ const Login = () => {
                 <Mail size={20} />
               </div>
               <input
-                type="text"
-                id="email-address-icon"
+                type="email"
+                name="email"
+                value={values.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                id="email"
                 className=" text-sm rounded-sm block border-0 w-full ps-10 p-3 dark:bg-dark-20  placeholder-gray-400 text-gray-400"
                 placeholder="john@gmail.com"
               />
             </div>
-            <p className="block text-xs tracking-wide mt-2 text-gray-400">
-              We’ll never share your details.
-            </p>
+            {errors.email && touched.email ? (
+              <span className="text-xs font-poppins text-red-500">
+                {errors.email}
+              </span>
+            ) : (
+              <p className="block text-xs tracking-wide mt-2 text-gray-400">
+                We’ll never share your details.
+              </p>
+            )}
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email-address-icon" className="block mb-2 text-sm">
+            <label htmlFor="password" className="block mb-2 text-sm">
               Password
             </label>
             <div className="relative">
@@ -50,25 +99,37 @@ const Login = () => {
                 <Lock size={20} />
               </div>
               <input
-                type="password"
-                id="email-address-icon"
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={values.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 className=" text-sm rounded-sm block border-0 w-full ps-10 p-3 dark:bg-dark-20  placeholder-gray-400 text-gray-400"
                 placeholder="password"
               />
-              <div className="absolute inset-y-0 end-3 flex items-center ps-3.5 pointer-events-none">
-                <Eye size={20} />
+              <div className="absolute inset-y-0 end-3 flex items-center ps-3.5">
+                <button onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <Eye size={20} /> : <EyeClosed size={20} />}
+                </button>
               </div>
             </div>
+            {errors.password && touched.password && (
+              <span className="text-xs font-poppins text-red-500">
+                {errors.password}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center ">
               <input
-                checked
+                checked={values.rememberMe}
+                onChange={handleChange}
+                name="rememberMe"
                 id="checkbox-1"
                 type="checkbox"
-                value=""
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 "
+                className="w-4 h-4  rounded focus:ring-blue-600 ring-offset-gray-800  bg-gray-700 border-gray-600"
               />
               <label
                 htmlFor="checkbox-1"
@@ -88,7 +149,14 @@ const Login = () => {
             </div>
           </div>
 
-          <Button text="Login" type="submit" variant="primary" style="w-full" />
+          <Button
+            text="Login"
+            type="submit"
+            variant="primary"
+            style="w-full"
+            isLoading={isSubmitting}
+            loadingMsg="Logging in"
+          />
         </form>
 
         <p className="text-gray-500 text-center my-6">OR</p>
