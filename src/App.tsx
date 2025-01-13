@@ -8,29 +8,34 @@ import LandingPage from "./components/LandingPage/LandingPage";
 import CreatePoll from "./Pages/CreatePoll/CreatePoll";
 import Poll from "./Pages/Poll/Poll";
 import Results from "./Pages/Results/Results";
+import RankingPoll from "./Pages/RankingPoll/RankingPoll";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Main />,
-    children:[
+    children: [
       {
-        path:'/',
-        element:<LandingPage/>
+        path: "/",
+        element: <LandingPage />,
       },
       {
-        path:'/create-poll',
-        element:<CreatePoll/>
+        path: "/create-poll",
+        element: <CreatePoll />,
       },
       {
-        path:'/poll/:id',
-        element:<Poll/>
+        path: "/poll/:id/vote",
+        element: <Poll />,
       },
       {
-        path:'/poll/:id/results',
-        element:<Results/>
-      }
-    ]
+        path: "/ranking/:id/vote",
+        element: <RankingPoll />,
+      },
+      {
+        path: "/poll/:id/results",
+        element: <Results />,
+      },
+    ],
   },
   {
     path: "/login",
@@ -41,9 +46,9 @@ const router = createBrowserRouter([
     element: <Register />,
   },
   {
-    path:'/forgot-password',
-    element:<Forgot/>
-  }
+    path: "/forgot-password",
+    element: <Forgot />,
+  },
 ]);
 
 function App() {
