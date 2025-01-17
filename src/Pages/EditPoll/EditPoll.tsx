@@ -1,12 +1,25 @@
-import { v4 as uuid } from "uuid";
-import { useFormik } from "formik";
+import React from "react";
+
+// yup validation schema
 import { PollSchema } from "../../Utils/yup";
 
+// uuid
+import { v4 as uuid } from "uuid";
+
+// components
+import Wrapper from "../../components/Wrapper/Wrapper";
+import Button from "../../components/Button/Button";
+
+import { useFormik } from "formik";
+import { AnimatePresence, motion } from "motion/react";
+
+// options
 type Option = {
   id: string;
   value: string;
 };
 
+// interface
 interface Formvalues {
   pollTitle: string;
   pollType: string;
@@ -18,17 +31,10 @@ interface Formvalues {
   useCAPTCHA?: boolean;
 }
 
-// framer motion
-import { motion, AnimatePresence } from "motion/react";
-
-// components
-import Wrapper from "../../components/Wrapper/Wrapper";
-import Button from "../../components/Button/Button";
-
 // icons
 import { ChartArea, X, Plus } from "lucide-react";
 
-const CreatePoll = () => {
+const EditPoll = () => {
   const initialValues: Formvalues = {
     pollTitle: "",
     pollType: "",
@@ -78,9 +84,9 @@ const CreatePoll = () => {
     <div className="flex justify-center">
       <Wrapper>
         <header className="text-center">
-          <h1 className="text-xl ">Create poll</h1>
+          <h1 className="text-xl ">Edit poll</h1>
           <p className="text-sm text-gray-400 mt-2">
-            Fill in the form below to create your poll.
+            Fill in the form below to update your poll.
           </p>
         </header>
 
@@ -355,12 +361,12 @@ const CreatePoll = () => {
           </div>
 
           <Button
-            text="Create Poll"
+            text="Update Poll"
             type="submit"
             variant="primary"
             style="w-full"
             isLoading={isSubmitting}
-            loadingMsg="Creating"
+            loadingMsg="Updating"
             icon={<ChartArea size={18} />}
           />
         </form>
@@ -369,4 +375,4 @@ const CreatePoll = () => {
   );
 };
 
-export default CreatePoll;
+export default EditPoll;

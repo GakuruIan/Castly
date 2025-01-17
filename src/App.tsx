@@ -9,6 +9,7 @@ import CreatePoll from "./Pages/CreatePoll/CreatePoll";
 import Poll from "./Pages/Poll/Poll";
 import Results from "./Pages/Results/Results";
 import RankingPoll from "./Pages/RankingPoll/RankingPoll";
+import EditPoll from "./Pages/EditPoll/EditPoll";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: "/create-poll",
         element: <CreatePoll />,
+      },
+      {
+        path: "/edit-poll/:id",
+        element: <EditPoll />,
       },
       {
         path: "/poll/:id/vote",
