@@ -1,3 +1,5 @@
+import React from "react"
+
 export function convertTime(timestamp:string):string{
    const createdAt= new Date(timestamp)
    const now= new Date()
@@ -7,7 +9,7 @@ export function convertTime(timestamp:string):string{
 //    minutes past
    if(diffinsec < 3600){
     const minutes = Math.floor(diffinsec/60)
-    return `${minutes} ago`
+    return `${minutes} minutes ago`
    }
 
 //    hours past
@@ -27,4 +29,20 @@ export function convertTime(timestamp:string):string{
     month:"long",
     year:"numeric"
    }).format(createdAt)
+}
+
+export function CopyToClipboard(inputRef:React.RefObject<HTMLInputElement>){
+   return new Promise((resolve,reject)=>{
+
+         if(!inputRef.current){
+            return reject(new Error("Input Field not found"))
+         }
+         
+         inputRef.current.select()
+         
+         navigator.clipboard.writeText(inputRef.current.value)
+         .then(()=>resolve("Link copied"))
+         .catch((err)=>reject(err))
+     
+   })
 }

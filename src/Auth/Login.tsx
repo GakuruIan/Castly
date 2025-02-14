@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+// icons
 import { Mail, Lock, Eye, EyeClosed } from "lucide-react";
 
 // formik
@@ -23,6 +24,9 @@ import { useNavigate } from "react-router-dom";
 // toast
 import { toast } from "react-toastify";
 
+// interface
+import { messageResponse } from "../interfaces.ts";
+
 interface Formvalues {
   email: string;
   password: string;
@@ -44,7 +48,7 @@ const Login = () => {
   const onSubmit = async (values: Formvalues) => {
     const { rememberMe, ...data } = values;
     await axiosInstance
-      .post("/login", data)
+      .post<messageResponse>("/login", data)
       .then((response) => {
         if (response.status === 200) {
           toast.success(`${response.data?.message}`);

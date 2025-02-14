@@ -29,7 +29,7 @@ const router = createBrowserRouter([
         element: <EditPoll />,
       },
       {
-        path: "/poll/:id/vote",
+        path: "/multiple_choice/:id/vote",
         element: <Poll />,
       },
       {

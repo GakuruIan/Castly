@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 
+import {
+  Poll,
+  OptionsResponse,
+  PollResponse,
+  rankOptions,
+} from "../../interfaces";
+
 // router
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 //dnd
 import {
@@ -19,6 +26,7 @@ import {
 import Wrapper from "../../components/Wrapper/Wrapper";
 import Header from "../../components/Header/Header";
 import Options from "../../components/Options/Options";
+import CopytoClipboard from "../../components/CopyToClipboard/CopyToClipboard";
 
 import {
   SortableContext,
@@ -36,46 +44,10 @@ import { toast } from "react-toastify";
 // util function (convert time)
 import { convertTime } from "../../Utils/utils";
 
-interface Poll {
-  _id: string;
-  ip: string;
-  title: string;
-  description: string;
-  poll_type: string;
-  allow_multiple_votes: boolean;
-  openDate: string; // Stored as ISO Date String
-  closeDate: string; // Stored as ISO Date String
-  useCaptcha: boolean;
-  requirePartcipantName: boolean;
-  isClosed: boolean;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-  settings: {
-    one_vote_per_ip: boolean;
-    require_account: boolean;
-  };
-  options: {
-    _id: string;
-    option: string;
-    image_url: string | null;
-    position: number | null;
-  }[];
-}
-
-interface OptionsResponse {
-  _id: string;
-  option: string;
-  image_url: string | null;
-  position: number | null;
-}
-
-interface PollResponse {
-  poll: Poll;
-}
-
 const RankingPoll = () => {
   const params = useParams();
+
+  const navigation = useNavigate();
 
   const [poll, setPoll] = useState<Poll>();
 
@@ -88,13 +60,11 @@ const RankingPoll = () => {
         if (response.status === 200) {
           setPoll(response.data.poll);
           setOptions(response.data.poll.options);
-
-          console.log(response.data.poll);
         }
       })
       .catch((err) => {
         const { data } = err.response;
-        console.log(data);
+        console.log(err);
         toast.error(`${data.message}`);
       });
   };
@@ -128,7 +98,38 @@ const RankingPoll = () => {
   };
 
   const handleSubmit = async () => {
-    console.log(options);
+    const rank_options: rankOptions = [];
+    const maxScore = options.length;
+
+    options.forEach((option, index) => {
+      let rank_score = maxScore - index;
+      let rank_position = index + 1;
+
+      rank_options[index] = {
+        option_id: option._id,
+        rank_score,
+        rank_position,
+      };
+    });
+
+    const data = {
+      poll_id: params.id,
+      ranks: rank_options,
+    };
+
+    await axiosInstance
+      .post("/vote", data)
+      .then((response) => {
+        if (response.status === 200) {
+          toast.success("Your vote was added successfully");
+          navigation(`/poll/${params.id}/results`);
+        }
+      })
+      .catch((err) => {
+        const { data } = err.response;
+        console.log(err);
+        toast.error(`${data.message}`);
+      });
   };
 
   return (
@@ -136,9 +137,11 @@ const RankingPoll = () => {
       <div className="flex justify-center w-full mb-6">
         <Wrapper>
           <Header
-            title={poll?.title}
+            title={poll?.title ? poll?.title : ""}
             creator="username"
-            time={convertTime(poll?.createdAt)}
+            time={
+              poll?.createdAt ? convertTime(poll.createdAt) : "Invalid date"
+            }
           />
           <p className="text-sm text-gray-300 my-4">Drag to sort the choices</p>
           <div className="mt-2 mb-6 w-full">
@@ -171,11 +174,17 @@ const RankingPoll = () => {
             {/* choice */}
           </div>
           <Button
-            text="button"
+            text="Submit"
             handleClick={handleSubmit}
             variant="primary"
             type="submit"
             style="w-full py-1.5 my-2"
+          />
+
+          <CopytoClipboard
+            link={`${import.meta.env.VITE_CLIENT_BASE_URL}/ranking/${
+              params?.id
+            }/vote`}
           />
         </Wrapper>
       </div>

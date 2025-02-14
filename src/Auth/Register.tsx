@@ -23,6 +23,9 @@ import { toast } from "react-toastify";
 // router
 import { useNavigate } from "react-router-dom";
 
+// interface
+import { messageResponse } from "../interfaces.ts";
+
 interface Formvalues {
   name: string;
   email: string;
@@ -47,7 +50,7 @@ const Register = () => {
     const { confirm_password, ...data } = values;
 
     await axiosInstance
-      .post("/register", data)
+      .post<messageResponse>("/register", data)
       .then((response) => {
         if (response.status === 201) {
           toast.success(`${response.data?.message}`);
