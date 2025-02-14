@@ -4,6 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root{
+  --toastify-color-light: #222233;
+  --toastify-text-color-light:#fff;
+  --toastify-color-success: #4AD092;
+  --toastify-color-info:#0579F9;
+  --toastify-color-error:#C70D3A;
+  --toastify-font-family:poppins;
+}
+
 h1,
 h2,
 h3 {
@@ -13,6 +22,10 @@ h3 {
 body {
   @apply font-saira bg-dark-100 text-white;
   font-weight: 300;
+}
+
+.Toastify__close-button {
+  color:#fff
 }
 
 ::-webkit-calendar-picker-indicator {

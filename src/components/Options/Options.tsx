@@ -8,14 +8,16 @@ import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 
 interface OptionsProps {
-  id: number;
+  id: number | string;
   image: string | null;
-  content: string;
+  option: string;
 }
 
-const Options: React.FC<OptionsProps> = ({ id, image, content }) => {
+const Options: React.FC<OptionsProps> = ({ id, image, option }) => {
+  const stringId = id.toString();
+
   const { attributes, listeners, transform, transition, setNodeRef } =
-    useSortable({ id });
+    useSortable({ id: stringId });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -35,7 +37,7 @@ const Options: React.FC<OptionsProps> = ({ id, image, content }) => {
           </div>
         )}
 
-        <p className="text-base font-medium text-gray-300">{content}</p>
+        <p className="text-base font-medium text-gray-300">{option}</p>
       </div>
       {/* drag icon */}
       <Grip size={20} />

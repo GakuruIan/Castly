@@ -56,10 +56,13 @@ const router = createBrowserRouter([
   },
 ]);
 
+import { ToastContainer, Zoom } from "react-toastify";
+
 function App() {
   return (
     <>
       <RouterProvider router={router} />
+      <ToastContainer transition={Zoom} className="font-poppins text-sm" />
     </>
   );
 }

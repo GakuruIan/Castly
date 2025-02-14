@@ -14,6 +14,15 @@ import logo from "../assets/logo.png";
 // components
 import Wrapper from "../components/Wrapper/Wrapper";
 
+// axios
+import { axiosInstance } from "../Axios/axios.ts";
+
+// router
+import { useNavigate } from "react-router-dom";
+
+// toast
+import { toast } from "react-toastify";
+
 interface Formvalues {
   email: string;
   password: string;
@@ -23,6 +32,8 @@ interface Formvalues {
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
+  const navigate = useNavigate();
+
   const initialValues: Formvalues = {
     email: "",
     password: "",
@@ -31,7 +42,20 @@ const Login = () => {
 
   // submit function
   const onSubmit = async (values: Formvalues) => {
-    console.log(values);
+    const { rememberMe, ...data } = values;
+    await axiosInstance
+      .post("/login", data)
+      .then((response) => {
+        if (response.status === 200) {
+          toast.success(`${response.data?.message}`);
+          navigate("/", { replace: true });
+        }
+      })
+      .catch((err) => {
+        const { data } = err.response;
+        console.log(data);
+        toast.error(`${data.message}`);
+      });
   };
 
   const {
@@ -109,7 +133,10 @@ const Login = () => {
                 placeholder="password"
               />
               <div className="absolute inset-y-0 end-3 flex items-center ps-3.5">
-                <button onClick={() => setShowPassword(!showPassword)}>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
                   {showPassword ? <Eye size={20} /> : <EyeClosed size={20} />}
                 </button>
               </div>

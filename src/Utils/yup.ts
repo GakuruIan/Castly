@@ -17,10 +17,24 @@ export const LoginSchema = yup.object().shape({
 
 
 export const PollSchema = yup.object().shape({
-    pollTitle:yup.string().min(5,"Title must be more than 5 characters").max(30,"Title must be less than 30 characters").required(),
-    options:yup.array().of(yup.object({value:yup.string().min(3,"option cannot be less than 3 characters").max(30,"Option cannot be more than 30 characters").required("Option cannot be empty")})),
-    openDate:yup.date().min(today,"Date cannot be in the past"),
-    closeDate:yup.date().required("Close date is required").when("openDate",(openDate,schema)=>{
-        return openDate ? schema.min(openDate,"Close day cannot be earlier than open date") : schema
-    })
+    pollTitle:yup.string().min(5,"Title must be more than 5 characters").max(100,"Title must be less than 100 characters").required(),
+    description:yup.string().min(5,"Description cannot be less then 5 characters").max(60,"Description cannot be more than 60 characters").nullable(),
+    options:yup.array().of(yup.object({option:yup.string().min(3,"option cannot be less than 3 characters").max(30,"Option cannot be more than 30 characters").required("Option cannot be empty")})),
+    openDate:yup.date().nullable()
+    .transform((_, originalValue) => 
+      originalValue === "" ? null : new Date(originalValue)
+    ).min(today,"Date cannot be in the past"),
+   closeDate: yup.date()
+  .nullable()
+  .transform((_, originalValue) => 
+    originalValue === "" ? null : new Date(originalValue)
+  )
+  .required("Close date is required")
+  .when("openDate", (openDateValue, schema) => {
+    // Extract value from array
+    const openDate = Array.isArray(openDateValue) ? openDateValue[0] : openDateValue;
+
+    return openDate ? schema.min(openDate, "Close date cannot be earlier than open date") : schema;
+  }),
+    requireParcipantName:yup.string().min(3,"Name cannot be less than 3 characters")
 })

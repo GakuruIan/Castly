@@ -4,22 +4,31 @@ import { PollSchema } from "../../Utils/yup";
 
 type Option = {
   id: string;
-  value: string;
+  option: string;
 };
 
 interface Formvalues {
   pollTitle: string;
+  description: string;
   pollType: string;
   pollSettings: string;
   options: Option[];
   openDate: string | number;
   closeDate: string | number;
-  requireUsername?: boolean;
+  requirePartcipantName?: boolean;
   useCAPTCHA?: boolean;
+  allow_multiple_votes?: boolean;
+}
+
+// create poll interface
+interface CreatePollResponse {
+  message: string;
+  pollID: string;
+  type: string;
 }
 
 // framer motion
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useAnimationControls } from "motion/react";
 
 // components
 import Wrapper from "../../components/Wrapper/Wrapper";
@@ -28,20 +37,103 @@ import Button from "../../components/Button/Button";
 // icons
 import { ChartArea, X, Plus } from "lucide-react";
 
+// axios
+import { axiosInstance } from "../../Axios/axios";
+
+// toast notification
+import { toast } from "react-toastify";
+
+// router
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 const CreatePoll = () => {
+  const navigate = useNavigate();
+
+  const [addDescription, setAddDescription] = useState(false);
+
+  const containerControl = useAnimationControls();
+
+  const containerVariants = {
+    slideIn: {
+      y: 0,
+      opacity: 1,
+      height: "auto",
+      transition: {
+        duration: 0.8,
+        delay: 0.2,
+        ease: "easeInOut",
+      },
+    },
+    slideOut: {
+      y: -60,
+      opacity: 0,
+      height: 0,
+      transition: {
+        duration: 0.8,
+        delay: 0.2,
+        ease: "easeInOut",
+      },
+    },
+  };
+
+  useEffect(() => {
+    if (addDescription) {
+      containerControl.start("slideIn");
+    } else {
+      containerControl.start("slideOut");
+    }
+  }, [addDescription]);
+
+  const today = new Date();
+  const localDate = new Date(
+    today.getTime() - today.getTimezoneOffset() * 60000
+  )
+    .toISOString()
+    .split("T")[0];
+
   const initialValues: Formvalues = {
     pollTitle: "",
-    pollType: "",
-    pollSettings: "",
-    options: [{ id: uuid().replace(/-/g, "").substring(0, 7), value: "" }],
-    openDate: "",
+    description: "",
+    pollType: "multiple_choice",
+    pollSettings: "one_vote_per_ip",
+    options: [{ id: uuid().replace(/-/g, "").substring(0, 7), option: "" }],
+    openDate: localDate,
     closeDate: "",
-    requireUsername: false,
+    requirePartcipantName: false,
     useCAPTCHA: false,
+    allow_multiple_votes: false,
   };
 
   const onSubmit = async (values: Formvalues) => {
-    console.log(values);
+    const { useCAPTCHA, options, pollSettings, ...data } = values;
+
+    data.options = options.map(({ option }) => ({ option }));
+
+    const formData = { ...data, settings: { [pollSettings]: true } };
+
+    console.log(formData);
+
+    await axiosInstance
+      .post<CreatePollResponse>("/create-poll", formData)
+      .then((response) => {
+        if (response.status === 201) {
+          toast.success(`${response.data?.message}`);
+
+          if (response.data?.type === "ranking") {
+            navigate(`/${response.data?.type}/${response.data?.pollID}/vote`);
+          }
+
+          if (response.data.type === "multiple_choice") {
+            navigate(`/${response.data?.type}/${response.data?.pollID}/vote`);
+          }
+        }
+      })
+      .catch((err) => {
+        const { data } = err.response;
+        console.log(data);
+        toast.error(`${data.message}`);
+      });
   };
 
   const {
@@ -62,7 +154,7 @@ const CreatePoll = () => {
   const handleAddOption = () => {
     setFieldValue("options", [
       ...values.options,
-      { id: uuid().replace(/-/g, "").substring(0, 7), name: "", value: "" },
+      { id: uuid().replace(/-/g, "").substring(0, 7), option: "" },
     ]);
   };
 
@@ -85,7 +177,7 @@ const CreatePoll = () => {
         </header>
 
         <form action="" className="" onSubmit={handleSubmit}>
-          <div className="mb-6">
+          <div className="mb-4">
             <label htmlFor="email-address-icon" className="block mb-2 text-sm">
               Title
             </label>
@@ -112,8 +204,43 @@ const CreatePoll = () => {
                 </p>
               )}
 
-              {/* <button className="bg-inherit text-gray-400 hover:text-gray-300 text-sm">Add description</button> */}
+              <button
+                onClick={() => {
+                  setAddDescription((prev) => !prev);
+                }}
+                type="button"
+                className="bg-inherit text-gray-400 hover:text-gray-300 text-sm"
+              >
+                Add description
+              </button>
             </div>
+          </div>
+
+          <div className="relative overflow-hidden h-auto ">
+            <motion.div
+              className="relative p-1 mb-4"
+              variants={containerVariants}
+              animate={containerControl}
+              initial="slideOut"
+            >
+              <div className="">
+                <textarea
+                  name="description"
+                  id="description"
+                  value={values.description}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  rows={4}
+                  placeholder="Poll description"
+                  className=" text-sm rounded-sm block border-0 w-full p-2.5 dark:bg-dark-20  placeholder-gray-400 text-gray-400 mb-1.5"
+                ></textarea>
+                {errors.description && touched.description && (
+                  <span className="text-xs font-poppins text-red-500">
+                    {errors.description}
+                  </span>
+                )}
+              </div>
+            </motion.div>
           </div>
 
           <div className="mb-4">
@@ -129,9 +256,7 @@ const CreatePoll = () => {
                 onBlur={handleBlur}
                 className=" text-sm rounded-sm block border-0 w-full p-2.5 dark:bg-dark-20  placeholder-gray-400 text-gray-400"
               >
-                <option value="multiple" selected>
-                  Multiple choice
-                </option>
+                <option value="multiple_choice">Multiple choice</option>
                 <option value="ranking">Ranking</option>
                 <option value="poll">Image Poll</option>
               </select>
@@ -165,8 +290,8 @@ const CreatePoll = () => {
                     <input
                       type="text"
                       id="email-address-icon"
-                      name={`options[${index}].value`}
-                      value={option.value}
+                      name={`options[${index}].option`}
+                      value={option.option}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       className=" text-sm rounded-sm block border-0 w-full p-2.5 dark:bg-dark-20  placeholder-gray-400 text-gray-400"
@@ -184,7 +309,7 @@ const CreatePoll = () => {
                         className="text-xs font-poppins text-red-500"
                         onClick={() => console.log(errors?.options?.[index])}
                       >
-                        {errors?.options?.[index]?.value}
+                        {errors?.options?.[index]?.option}
                       </span>
                     )}
                   </motion.div>
@@ -225,17 +350,11 @@ const CreatePoll = () => {
                       onBlur={handleBlur}
                       className=" text-sm rounded-sm block border-0 w-full p-2.5 dark:bg-dark-20  placeholder-gray-400 text-gray-400"
                     >
-                      <option value="one_vote_per_ip" selected>
-                        One vote per IP address
+                      <option value="one_vote_per_ip">
+                        One vote per IP Address
                       </option>
                       <option value="require_account">
                         One vote per Castly account
-                      </option>
-                      <option value="allow_ananymous">
-                        Allow ananymous Voting
-                      </option>
-                      <option value="multiple_voting">
-                        Allow multiple votes per user
                       </option>
                     </select>
 
@@ -251,8 +370,25 @@ const CreatePoll = () => {
                   <input
                     id="checked-checkbox"
                     type="checkbox"
-                    name="requireUsername"
-                    checked={values.requireUsername}
+                    name="allow_multiple_votes"
+                    checked={values.allow_multiple_votes}
+                    onChange={handleChange}
+                    className="w-4 h-4  rounded focus:ring-blue-600 ring-offset-gray-800  bg-gray-700 border-gray-600"
+                  />
+                  <label
+                    htmlFor="checked-checkbox"
+                    className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  >
+                    Allow multiple voting
+                  </label>
+                </div>
+
+                <div className="flex items-center mb-4">
+                  <input
+                    id="checked-checkbox"
+                    type="checkbox"
+                    name="requirePartcipantName"
+                    checked={values.requirePartcipantName}
                     onChange={handleChange}
                     className="w-4 h-4  rounded focus:ring-blue-600 ring-offset-gray-800  bg-gray-700 border-gray-600"
                   />
@@ -284,16 +420,13 @@ const CreatePoll = () => {
 
               <div className="">
                 <div className="mb-4">
-                  <label
-                    htmlFor="email-address-icon"
-                    className="block mb-2 text-sm"
-                  >
+                  <label htmlFor="openDate" className="block mb-2 text-sm">
                     Open Date
                   </label>
                   <div className="relative">
                     <input
                       type="date"
-                      id="email-address-icon"
+                      id="openDate"
                       name="openDate"
                       value={values.openDate}
                       onChange={handleChange}
@@ -311,21 +444,17 @@ const CreatePoll = () => {
                     <p className="block text-xs tracking-wide mt-2 text-gray-400">
                       Date when the poll starts
                     </p>
-                    {/* <button className="bg-inherit text-gray-400 hover:text-gray-300 text-sm">Add description</button> */}
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <label
-                    htmlFor="email-address-icon"
-                    className="block mb-2 text-sm"
-                  >
+                  <label htmlFor="closeDate" className="block mb-2 text-sm">
                     Close Date
                   </label>
                   <div className="relative">
                     <input
                       type="date"
-                      id="email-address-icon"
+                      id="closeDate"
                       name="closeDate"
                       value={values.closeDate}
                       onChange={handleChange}
@@ -346,7 +475,6 @@ const CreatePoll = () => {
                       <p className="block text-xs tracking-wide mt-2 text-gray-400">
                         Date when the poll ends
                       </p>
-                      {/* <button className="bg-inherit text-gray-400 hover:text-gray-300 text-sm">Add description</button> */}
                     </div>
                   </div>
                 </div>

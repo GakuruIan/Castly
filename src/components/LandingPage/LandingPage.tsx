@@ -1,7 +1,11 @@
 import React from "react";
 import Button from "../Button/Button";
 
+// router
+import { useNavigate } from "react-router-dom";
+
 const LandingPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="relative">
       <div className="h-[calc(100vh-100px)] px-2 flex items-center justify-center flex-col gap-y-4">
@@ -18,6 +22,7 @@ const LandingPage = () => {
             variant="primary"
             type="button"
             style="w-48"
+            handleClick={() => navigate("/create-poll", { replace: true })}
           />
         </div>
       </div>

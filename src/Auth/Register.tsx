@@ -1,18 +1,27 @@
-import { Mail, Lock, Eye, EyeClosed, User } from "lucide-react";
+import { useState } from "react";
 
+import { Mail, Lock, Eye, EyeClosed, User } from "lucide-react";
 // form
 import { useFormik } from "formik";
 import { RegisterSchema } from "../Utils/yup.ts";
 
 import Button from "../components/Button/Button";
-import { Link } from "react-router-dom";
+import { Link, replace } from "react-router-dom";
 
 // logo
 import logo from "../assets/logo.png";
 
 // components
 import Wrapper from "../components/Wrapper/Wrapper";
-import { useState } from "react";
+
+// axios
+import { axiosInstance } from "../Axios/axios.ts";
+
+// toast
+import { toast } from "react-toastify";
+
+// router
+import { useNavigate } from "react-router-dom";
 
 interface Formvalues {
   name: string;
@@ -24,6 +33,8 @@ interface Formvalues {
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
 
+  const navigate = useNavigate();
+
   const initialValues: Formvalues = {
     name: "",
     email: "",
@@ -33,7 +44,21 @@ const Register = () => {
 
   // submit function
   const onSubmit = async (values: Formvalues) => {
-    console.log(values);
+    const { confirm_password, ...data } = values;
+
+    await axiosInstance
+      .post("/register", data)
+      .then((response) => {
+        if (response.status === 201) {
+          toast.success(`${response.data?.message}`);
+          navigate("/", { replace: true });
+        }
+      })
+      .catch((err) => {
+        const { data } = err.response;
+        console.log(data);
+        toast.error(`${data.message}`);
+      });
   };
 
   const {
