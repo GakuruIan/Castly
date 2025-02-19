@@ -33,6 +33,10 @@ const router = createBrowserRouter([
         element: <Poll />,
       },
       {
+        path: "/my-polls",
+        element: <MyPolls />,
+      },
+      {
         path: "/ranking/:id/vote",
         element: <RankingPoll />,
       },
@@ -57,6 +61,7 @@ const router = createBrowserRouter([
 ]);
 
 import { ToastContainer, Zoom } from "react-toastify";
+import MyPolls from "./Pages/MyPolls/MyPolls";
 
 function App() {
   return (
