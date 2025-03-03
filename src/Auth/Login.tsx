@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // icons
 import { Mail, Lock, Eye, EyeClosed } from "lucide-react";
@@ -27,6 +27,8 @@ import { toast } from "react-toastify";
 // interface
 import { messageResponse } from "../interfaces.ts";
 
+import { useAuth } from "../hooks/useAuth.ts";
+
 interface Formvalues {
   email: string;
   password: string;
@@ -34,9 +36,17 @@ interface Formvalues {
 }
 
 const Login = () => {
+  const { isAuthenticated } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  });
 
   const initialValues: Formvalues = {
     email: "",

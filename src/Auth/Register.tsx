@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Mail, Lock, Eye, EyeClosed, User } from "lucide-react";
 // form
@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 import { RegisterSchema } from "../Utils/yup.ts";
 
 import Button from "../components/Button/Button";
-import { Link, replace } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 // logo
 import logo from "../assets/logo.png";
@@ -26,6 +26,9 @@ import { useNavigate } from "react-router-dom";
 // interface
 import { messageResponse } from "../interfaces.ts";
 
+// auth
+import { useAuth } from "../hooks/useAuth.ts";
+
 interface Formvalues {
   name: string;
   email: string;
@@ -37,6 +40,14 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  });
 
   const initialValues: Formvalues = {
     name: "",

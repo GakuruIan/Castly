@@ -23,7 +23,7 @@ const Header: React.FC<props> = ({ title, creator, time }) => {
       <div className="block">
         <h2 className="text-xl mb-1">{title}</h2>
         <p className="text-xs tracking-wide text-gray-400">
-          By {creator} <span>at {time}</span>
+          Created By {creator} <span>at {time}</span>
         </p>
       </div>
 

@@ -102,8 +102,8 @@ const RankingPoll = () => {
     const maxScore = options.length;
 
     options.forEach((option, index) => {
-      let rank_score = maxScore - index;
-      let rank_position = index + 1;
+      const rank_score = maxScore - index;
+      const rank_position = index + 1;
 
       rank_options[index] = {
         option_id: option._id,
@@ -131,6 +131,10 @@ const RankingPoll = () => {
         toast.error(`${data.message}`);
       });
   };
+
+  if (poll?.isClosed) {
+    navigation(`/poll/${params.id}/results`);
+  }
 
   return (
     <div>

@@ -1,95 +1,45 @@
-// components
-import Wrapper from "../../components/Wrapper/Wrapper";
-import Header from "../../components/Header/Header";
+import React, { useEffect, useState } from "react";
 
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Doughnut, Line } from "react-chartjs-2";
+import MultipleChoiceResults from "../../components/Results/MultipleChoice";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+import { axiosInstance } from "../../Axios/axios";
+
+// router
+import { useParams } from "react-router-dom";
+
+// results interface
+import { Results as ResultsProps } from "../../interfaces";
+import RankingResults from "../../components/Results/RankingResults";
 
 const Results = () => {
-  const data = {
-    labels: ["candidate 1", "candidate 2", "candidate 3"],
-    datasets: [
-      {
-        label: "Votes",
-        data: [65, 10, 25],
-        backgroundColor: ["#FF4069", "#059BFF", "#FFC234"],
-        borderColor: "#14182A",
-      },
-    ],
+  const { id } = useParams();
+  const [results, setResults] = useState<ResultsProps>();
+
+  const FetchData = async () => {
+    try {
+      axiosInstance.get<ResultsProps>(`/results/${id}`).then((response) => {
+        if (response.status === 200) {
+          setResults(response.data);
+          console.log(response.data);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const config = {
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          position: "bottom",
-        },
-        title: {
-          display: true,
-          text: "Votes",
-        },
-      },
-    },
-  };
+  useEffect(() => {
+    FetchData();
+  }, []);
 
   return (
-    <div>
-      <div className="flex justify-center w-full">
-        <Wrapper>
-          <Header title="poll title" creator="username" time="30" />
+    <>
+      {results?.poll_type === "multiple_choice" && (
+        <MultipleChoiceResults results={results} />
+      )}
 
-          <div className="mt-6">
-            <div className="grid md:grid-cols-1 w-full gap-y-4">
-              {/* candidate score */}
-
-              <div className="">
-                <div className="mb-4">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-base font-medium text-white">
-                      Candidate name
-                    </span>
-                    <span className="text-sm font-medium text-white">45%</span>
-                  </div>
-                  <div className="w-full rounded-full h-2.5 bg-dark-20">
-                    <div
-                      className="bg-blue-600  h-2.5 rounded-full"
-                      style={{ width: "45%" }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-base font-medium text-white">
-                      Candidate name
-                    </span>
-                    <span className="text-sm font-medium text-white">
-                      65% (winner)
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full h-2.5 bg-dark-20">
-                    <div
-                      className="bg-green-400  h-2.5 rounded-full"
-                      style={{ width: "65%" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-              {/* candidate score */}
-
-              {/* chart */}
-              <div className="h-80 flex items-center justify-center w-full">
-                <Doughnut options={config} data={data} />
-              </div>
-              {/* chart */}
-            </div>
-          </div>
-        </Wrapper>
-      </div>
-    </div>
+      {results?.poll_type === "ranking" && <RankingResults results={results} />}
+    </>
   );
 };
 

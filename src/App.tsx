@@ -11,6 +11,9 @@ import Results from "./Pages/Results/Results";
 import RankingPoll from "./Pages/RankingPoll/RankingPoll";
 import EditPoll from "./Pages/EditPoll/EditPoll";
 
+// auth provider
+import { AuthProvider } from "./hooks/AuthProvider";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -58,16 +61,23 @@ const router = createBrowserRouter([
     path: "/forgot-password",
     element: <Forgot />,
   },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
+  },
 ]);
 
 import { ToastContainer, Zoom } from "react-toastify";
 import MyPolls from "./Pages/MyPolls/MyPolls";
+import ResetPassword from "./Auth/Reset-password";
 
 function App() {
   return (
     <>
-      <RouterProvider router={router} />
-      <ToastContainer transition={Zoom} className="font-poppins text-sm" />
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <ToastContainer transition={Zoom} className="font-poppins text-sm" />
+      </AuthProvider>
     </>
   );
 }

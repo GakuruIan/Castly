@@ -10,10 +10,10 @@ export interface Poll {
   title: string;
   description: string;
   poll_type: string;
-  creator?:{
-    _id:string,
-    name:string
-  }
+  creator?: {
+    _id: string;
+    name: string;
+  };
   allow_multiple_votes: boolean;
   openDate: string; // Stored as ISO Date String
   closeDate: string; // Stored as ISO Date String
@@ -42,4 +42,46 @@ export type rankOptions = {
 
 export type messageResponse = {
   message: string;
+  redirect?: string;
 };
+
+export interface Results {
+  _id: string;
+  poll_id: string;
+  title: string;
+  poll_type: string;
+  description: string;
+  creator?: {
+    _id: string;
+    name: string;
+  };
+  createdAt: string;
+  isClosed: boolean;
+  total_votes: number;
+  results?: Result[];
+  ranking_results?: RankingResult[];
+  winner: Winner;
+}
+
+export interface Result {
+  option_id: string;
+  option_name: string;
+  votes: number;
+}
+
+export interface RankingResult {
+  option_id: string;
+  option_name: string;
+  rank_score: number;
+  ranking_position: number;
+}
+
+export interface Winner {
+  option_id: string;
+  option_name: string;
+  votes: number;
+}
+
+export interface ResultsProps {
+  results: Results;
+}
